@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Share2, Plus, Trash2, Users, Heart, Sparkles, Map, Ghost, Palette, Briefcase, Zap, RefreshCw } from 'lucide-react';
-import { supabase } from './supabase';
 
 const MONTHS = [
   'Mar 26', 'Apr 26', 'May 26', 'Jun 26', 'Jul 26', 'Aug 26',
@@ -25,23 +24,43 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
 
+  // Initialize client from window
+  const getSupabase = () => {
+    if (window.supabase) {
+      return window.supabase.createClient(
+        'https://dtoahvrajhjytmjhurjb.supabase.co',
+        'sb_publishable_ngyKixxJIvDfeS9EdMT7sw_GkcBdF7K'
+      );
+    }
+    return null;
+  };
+
   useEffect(() => {
+    const sb = getSupabase();
+    if (!sb) {
+      // Small delay if CDN hasn't loaded yet
+      setTimeout(fetchPredictions, 500);
+      return;
+    }
+    
     fetchPredictions();
     
-    // Optional: Realtime subscription
-    const subscription = supabase
+    const subscription = sb
       .channel('public:maria_predictions')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'maria_predictions' }, fetchPredictions)
       .subscribe();
 
     return () => {
-      supabase.removeChannel(subscription);
+      sb.removeChannel(subscription);
     };
   }, []);
 
   const fetchPredictions = async () => {
+    const sb = getSupabase();
+    if (!sb) return;
+
     setLoading(true);
-    const { data, error } = await supabase
+    const { data, error } = await sb
       .from('maria_predictions')
       .select('*')
       .order('created_at', { ascending: false });
@@ -52,13 +71,19 @@ function App() {
   };
 
   const submitPrediction = async () => {
+    const sb = getSupabase();
+    if (!sb) {
+      alert("Database connection not ready yet, try again in a sec!");
+      return;
+    }
+
     if (!userName.trim()) {
       alert("Please enter your name first!");
       return;
     }
 
     setLoading(true);
-    const { error } = await supabase
+    const { error } = await sb
       .from('maria_predictions')
       .insert([{ name: userName, timeline }]);
 
