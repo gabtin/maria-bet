@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.96.0",
     "lodash": "^4.17.23",
     "lucide-react": "^0.574.0",
     "lz-string": "^1.5.0",
@@ -29,9 +30,7 @@
     "globals": "^16.5.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.18",
-    "vite": "^8.0.0-beta.13"
-  },
-  "overrides": {
-    "vite": "^8.0.0-beta.13"
+    "tslib": "^2.8.1",
+    "vite": "^6.0.0"
   }
 }
