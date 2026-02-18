@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    @apply bg-[#FFF5F7] text-slate-800 antialiased;
+    background-image: 
+      radial-gradient(at 0% 0%, hsla(338,100%,95%,1) 0, transparent 50%), 
+      radial-gradient(at 50% 0%, hsla(225,100%,95%,1) 0, transparent 50%), 
+      radial-gradient(at 100% 0%, hsla(142,100%,95%,1) 0, transparent 50%);
+    background-attachment: fixed;
+  }
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(-1deg); }
+  50% { transform: rotate(1deg); }
+}
+
+.animate-wiggle {
+  animation: wiggle 2s ease-in-out infinite;
+}
+
+.glass-card {
+  @apply bg-white/70 backdrop-blur-md border border-white/50 shadow-xl shadow-pink-100/20;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  height: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-pink-200 rounded-full hover:bg-pink-300;
+}
