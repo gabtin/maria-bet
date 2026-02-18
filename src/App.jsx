@@ -70,6 +70,47 @@ function App() {
     setLoading(false);
   };
 
+  const deletePrediction = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this prediction? It will be gone for everyone!")) return;
+    
+    const sb = getSupabase();
+    if (!sb) return;
+
+    setLoading(true);
+    const { error } = await sb
+      .from('maria_predictions')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      alert("Error deleting: " + error.message);
+    } else {
+      fetchPredictions();
+    }
+    setLoading(false);
+  };
+
+  const clearGlobalPit = async () => {
+    if (!window.confirm("CRITICAL: This will delete EVERY prediction in the database for EVERYONE. Are you sure?")) return;
+    
+    const sb = getSupabase();
+    if (!sb) return;
+
+    setLoading(true);
+    // In Supabase, deleting without a filter is blocked, so we use a 'neq' or similar
+    const { error } = await sb
+      .from('maria_predictions')
+      .delete()
+      .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete everything
+
+    if (error) {
+      alert("Error clearing pit: " + error.message);
+    } else {
+      fetchPredictions();
+    }
+    setLoading(false);
+  };
+
   const submitPrediction = async () => {
     const sb = getSupabase();
     if (!sb) {
@@ -241,6 +282,13 @@ function App() {
                     comparisons.map((comp) => (
                       <div key={comp.id} className="flex items-center group bg-white/40 p-2 rounded-[1.5rem] border border-white hover:bg-white/60 transition-colors">
                         <div className="w-48 flex-shrink-0 flex items-center gap-3 pr-4 pl-2">
+                          <button 
+                            onClick={() => deletePrediction(comp.id)} 
+                            className="text-slate-200 hover:text-rose-500 transition-colors bg-white rounded-full p-1.5 shadow-sm opacity-0 group-hover:opacity-100"
+                            title="Delete this prediction"
+                          >
+                            <Trash2 size={12} />
+                          </button>
                           <span className="font-black text-slate-700 truncate text-sm uppercase tracking-tight">{comp.name}</span>
                         </div>
                         <div className="flex flex-1 gap-2">
@@ -265,21 +313,33 @@ function App() {
             </div>
 
             <div className="bg-slate-900 text-white p-8 rounded-[2rem] shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6">
-               <div>
-                  <h3 className="text-xl font-black mb-2 flex items-center gap-2">
-                    <Zap size={20} className="text-yellow-400" />
-                    Global Sync Active
-                  </h3>
-                  <p className="text-slate-400 text-sm font-medium">
-                    Every prediction published here is visible to all friends in real-time.
-                  </p>
+               <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                 <div>
+                    <h3 className="text-xl font-black mb-2 flex items-center gap-2">
+                      <Zap size={20} className="text-yellow-400" />
+                      Global Sync Active
+                    </h3>
+                    <p className="text-slate-400 text-sm font-medium">
+                      Every prediction published here is visible to all friends in real-time.
+                    </p>
+                 </div>
+                 <div className="flex gap-4 items-center">
+                   <button 
+                      onClick={fetchPredictions}
+                      className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-black uppercase tracking-widest transition-colors flex items-center gap-2"
+                   >
+                     <RefreshCw size={14} /> Refresh
+                   </button>
+                   {comparisons.length > 0 && (
+                     <button 
+                       onClick={clearGlobalPit}
+                       className="px-6 py-3 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-xl text-xs font-black uppercase tracking-widest transition-colors flex items-center gap-2 border border-rose-500/20"
+                     >
+                       <Trash2 size={14} /> Clear Pit
+                     </button>
+                   )}
+                 </div>
                </div>
-               <button 
-                  onClick={fetchPredictions}
-                  className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-black uppercase tracking-widest transition-colors flex items-center gap-2"
-               >
-                 <RefreshCw size={14} /> Refresh Pit
-               </button>
             </div>
           </div>
         )}
