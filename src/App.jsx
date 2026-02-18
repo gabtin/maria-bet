@@ -84,6 +84,24 @@ function App() {
 
   const removeComparison = (id) => setComparisons(comparisons.filter(c => c.id !== id));
 
+  // Helper to get a stable color for any text string
+  const getPhaseColor = (text) => {
+    const phase = PHASES.find(p => p.label === text);
+    if (phase) return phase.color;
+    
+    // For custom text, pick a color based on string hash
+    const colors = [
+      'bg-gradient-to-br from-pink-300 to-rose-400',
+      'bg-gradient-to-br from-purple-300 to-indigo-400',
+      'bg-gradient-to-br from-cyan-300 to-sky-400',
+      'bg-gradient-to-br from-emerald-300 to-teal-400',
+      'bg-gradient-to-br from-amber-300 to-orange-400',
+      'bg-gradient-to-br from-fuchsia-300 to-pink-400'
+    ];
+    const hash = text.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return colors[hash % colors.length];
+  };
+
   return (
     <div className="min-h-screen px-4 py-12 md:px-8 max-w-5xl mx-auto">
       <header className="mb-12 text-center animate-wiggle">
@@ -134,10 +152,11 @@ function App() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12 relative z-10">
               {MONTHS.map((month, idx) => {
-                const currentPhase = PHASES.find(p => p.label === timeline[idx]) || { color: 'bg-white', icon: Heart };
-                const Icon = currentPhase.icon;
+                const colorClass = getPhaseColor(timeline[idx]);
+                const currentPhase = PHASES.find(p => p.label === timeline[idx]);
+                const Icon = currentPhase?.icon || Heart;
                 return (
-                  <div key={idx} className="bg-white/50 border border-white p-4 rounded-3xl group hover:shadow-lg transition-all hover:-translate-y-1">
+                  <div key={idx} className={`border border-white p-4 rounded-3xl group hover:shadow-lg transition-all hover:-translate-y-1 ${colorClass.includes('gradient') ? 'bg-white/40' : 'bg-white/50'}`}>
                     <div className="flex justify-between items-center mb-4">
                       <span className="font-black text-[10px] text-slate-400 uppercase tracking-widest">{month}</span>
                       <Icon className="text-slate-200 group-hover:text-rose-300 transition-colors" size={14} />
@@ -152,7 +171,7 @@ function App() {
                           setTimeline(nt);
                         }}
                         placeholder="What's the vibe?"
-                        className="w-full p-3 rounded-xl font-black text-slate-700 text-xs bg-white border-2 border-slate-50 focus:border-rose-300 outline-none transition-all shadow-sm"
+                        className={`w-full p-3 rounded-xl font-black text-xs outline-none transition-all shadow-md border-2 border-white ${colorClass} text-white placeholder:text-white/60`}
                       />
                       <div className="flex flex-wrap gap-1">
                         {PHASES.slice(0, 4).map(p => (
@@ -221,12 +240,12 @@ function App() {
                         </div>
                         <div className="flex flex-1 gap-2">
                           {comp.timeline.map((text, i) => {
-                            const phase = PHASES.find(p => p.label === text) || { color: 'bg-slate-100 border-slate-200' };
+                            const colorClass = getPhaseColor(text);
                             return (
                               <div 
                                 key={i} 
                                 title={text}
-                                className={`flex-1 h-14 rounded-xl ${phase.color} shadow-sm transition hover:scale-110 hover:z-10 border-2 border-white flex items-center justify-center`}
+                                className={`flex-1 h-14 rounded-xl ${colorClass} shadow-sm transition hover:scale-110 hover:z-10 border-2 border-white flex items-center justify-center overflow-hidden`}
                               >
                                 <span className="text-[8px] font-black text-white px-1 text-center leading-tight truncate drop-shadow-sm">{text}</span>
                               </div>
